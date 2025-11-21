@@ -1,5 +1,5 @@
  PDC Linker 50.35 20000313.10.LINK55.
-  Module 'Obj\GOAL$000.EXE' Map. Fri Nov 21 13:47:26 2025
+  Module 'Obj\GOAL$000.EXE' Map. Fri Nov 21 13:52:25 2025
 
 Frame 010000   Size 003600.  Name=<   .data>, 	Chars=C0000040h. [IRW]
 Frame 020000   Size 000210.  Name=<  .rdata>, 	Chars=40000040h. [IR]
@@ -30,7 +30,7 @@ Frame 010000   Size 003600.  Name=<   .data>, 	Chars=C0000040h. [IRW]
    0116E8   Module 'H:\PROLOG\VPI\LIB\WIN32\MSC\INIT32.OBJ'
    011740   Module 'H:\PROLOG\LIB\WIN32\MSC\EASYWIN.OBJ'
    0117A8   Module 'Obj\GOAL$000.OBJ'
-   011DE8   Module 'C:\SKGMI\1. MyLabs\4 kurs 1 semestr\system of AI (Fomin)\work in progress (wip)\lab_4\Obj\GOAL$000.SYM'
+   011DE8   Module 'C:\SKGMI\1. MyLabs\4 kurs 1 semestr\system of AI (Fomin)\work in progress (wip)\lab_4\code\lab_4\Obj\GOAL$000.SYM'
    0124B8   Module 'iomin.obj'
    0124E0   Module 'memheapn.obj'
    012520   Module 'runflags.obj'
@@ -92,7 +92,7 @@ Frame 030000   Size 0115B0.  Name=<   .text>, 	Chars=60000020h. [CER]
    030000   Module 'H:\PROLOG\VPI\LIB\WIN32\MSC\INIT32.OBJ'
    0300A0   Module 'H:\PROLOG\LIB\WIN32\MSC\EASYWIN.OBJ'
    030B60   Module 'Obj\GOAL$000.OBJ'
-   031770   Module 'C:\SKGMI\1. MyLabs\4 kurs 1 semestr\system of AI (Fomin)\work in progress (wip)\lab_4\Obj\GOAL$000.SYM'
+   031770   Module 'C:\SKGMI\1. MyLabs\4 kurs 1 semestr\system of AI (Fomin)\work in progress (wip)\lab_4\code\lab_4\Obj\GOAL$000.SYM'
    031770   Module 'runerr.obj'
    0318B0   Module 'iogetln.obj'
    031A70   Module 'strcat0.obj'
@@ -257,7 +257,7 @@ Frame 010000   Size 003600.  Name=<   .data>, 	Chars=C0000040h. [IRW]
 01:00011B38 $global$dom$denymode 
 01:00011B50 $global$dom$bgi_ilist 
 01:00011D82 _PROLOG_Vars 
---- From 'C:\SKGMI\1. MyLabs\4 kurs 1 semestr\system of AI (Fomin)\work in progress (wip)\lab_4\Obj\GOAL$000.SYM'
+--- From 'C:\SKGMI\1. MyLabs\4 kurs 1 semestr\system of AI (Fomin)\work in progress (wip)\lab_4\code\lab_4\Obj\GOAL$000.SYM'
 01:00011DE8 _PROLOG_SymbolTable 
 --- From 'ioclose.obj'
 01:000124B8 _IO_Vars 
