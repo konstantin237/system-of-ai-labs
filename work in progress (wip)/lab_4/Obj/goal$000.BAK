@@ -1,0 +1,181 @@
+/* Produktsionnaya sistema: Operatsionnye sistemy */
+/* Variant 2 */
+
+domains
+  fact = symbol
+  rule_name = symbol
+
+database
+  working_memory(fact)
+  used_rule(rule_name)
+  derived_fact(fact)
+
+predicates
+  start
+  init_working_memory
+  clear_database
+  forward_reasoning
+  backward_reasoning(fact)
+  nondeterm fire_rule(rule_name) - (i) (o)
+  nondeterm can_fire
+  check_condition(fact)
+  add_fact(fact)
+  display_working_memory
+  display_result(fact)
+  show_derivation_tree
+
+goal
+  start.
+
+clauses
+  start:-
+    clear_database,
+    write("\n=== OPERATSIONNYE SISTEMY ===\n"),
+    init_working_memory,
+    write("\nIshodnaya pamyat:\n"),
+    display_working_memory,
+    
+    write("\n--- PRYAMOJ VYVOD ---\n"),
+    forward_reasoning,
+    write("\nRezultat:\n"),
+    display_working_memory,
+    show_derivation_tree,
+    
+    clear_database,
+    init_working_memory,
+    
+    write("\n--- OBRATNYJ VYVOD ---\n"),
+    write("Tsel: system_operates\n"),
+    backward_reasoning(system_operates),
+    display_result(system_operates),
+    !.
+
+  clear_database:-
+    retractall(working_memory(_)),
+    retractall(used_rule(_)),
+    retractall(derived_fact(_)).
+
+  init_working_memory:-
+    asserta(working_memory(loader_completed)),
+    asserta(working_memory(drivers_installed)).
+
+% === Правила системы ===
+  fire_rule(r1):-
+    not(used_rule(r1)),
+    check_condition(processes_started),
+    check_condition(memory_allocated),
+    add_fact(scheduler_running),
+    asserta(used_rule(r1)),
+    asserta(derived_fact(scheduler_running)),
+    write("R1: processes_started I memory_allocated => scheduler_running\n").
+
+  fire_rule(r2):-
+    not(used_rule(r2)),
+    check_condition(kernel_loaded),
+    check_condition(drivers_installed),
+    add_fact(processes_started),
+    asserta(used_rule(r2)),
+    asserta(derived_fact(processes_started)),
+    write("R2: kernel_loaded I drivers_installed => processes_started\n").
+
+  fire_rule(r3):-
+    not(used_rule(r3)),
+    check_condition(loader_completed),
+    add_fact(kernel_loaded),
+    asserta(used_rule(r3)),
+    asserta(derived_fact(kernel_loaded)),
+    write("R3: loader_completed => kernel_loaded\n").
+
+  fire_rule(r4):-
+    not(used_rule(r4)),
+    check_condition(scheduler_running),
+    check_condition(filesystem_mounted),
+    add_fact(system_operates),
+    asserta(used_rule(r4)),
+    asserta(derived_fact(system_operates)),
+    write("R4: scheduler_running I filesystem_mounted => system_operates\n").
+
+  fire_rule(r5):-
+    not(used_rule(r5)),
+    check_condition(kernel_loaded),
+    add_fact(memory_allocated),
+    asserta(used_rule(r5)),
+    asserta(derived_fact(memory_allocated)),
+    write("R5: kernel_loaded => memory_allocated\n").
+
+  fire_rule(r6):-
+    not(used_rule(r6)),
+    check_condition(drivers_installed),
+    add_fact(filesystem_mounted),
+    asserta(used_rule(r6)),
+    asserta(derived_fact(filesystem_mounted)),
+    write("R6: drivers_installed => filesystem_mounted\n").
+
+  can_fire:- fire_rule(_).
+
+  check_condition(F):- working_memory(F),!.
+  
+  add_fact(F):- not(working_memory(F)), asserta(working_memory(F)),!.
+  add_fact(_):-!.
+
+  forward_reasoning:- can_fire, !, forward_reasoning.
+  forward_reasoning.
+
+  backward_reasoning(F):- 
+    working_memory(F), 
+    write("Fakt '"), write(F), write("' najden\n"),!.
+
+  backward_reasoning(system_operates):-
+    write("=> system_operates nuzhny: scheduler_running, filesystem_mounted\n"),
+    backward_reasoning(scheduler_running),
+    backward_reasoning(filesystem_mounted),
+    fire_rule(r4),!.
+
+  backward_reasoning(scheduler_running):-
+    write("=> scheduler_running nuzhny: processes_started, memory_allocated\n"),
+    backward_reasoning(processes_started),
+    backward_reasoning(memory_allocated),
+    fire_rule(r1),!.
+
+  backward_reasoning(processes_started):-
+    write("=> processes_started nuzhny: kernel_loaded, drivers_installed\n"),
+    backward_reasoning(kernel_loaded),
+    backward_reasoning(drivers_installed),
+    fire_rule(r2),!.
+
+  backward_reasoning(kernel_loaded):-
+    write("=> kernel_loaded nuzhen: loader_completed\n"),
+    backward_reasoning(loader_completed),
+    fire_rule(r3),!.
+
+  backward_reasoning(memory_allocated):-
+    write("=> memory_allocated nuzhen: kernel_loaded\n"),
+    backward_reasoning(kernel_loaded),
+    fire_rule(r5),!.
+
+  backward_reasoning(filesystem_mounted):-
+    write("=> filesystem_mounted nuzhny: drivers_installed\n"),
+    backward_reasoning(drivers_installed),
+    fire_rule(r6),!.
+
+  display_working_memory:-
+    working_memory(F), 
+    write("  "), write(F), write("\n"), 
+    fail.
+  display_working_memory.
+
+  display_result(F):-
+    working_memory(F), 
+    write("\nUspeh! Fakt '"), write(F), write("' dokazan.\n"),!.
+  display_result(F):-
+    write("\nFakt '"), write(F), write("' ne mozhet byt dokazan.\n").
+
+  show_derivation_tree:-
+    write("\n--- Derevo vyvoda ---\n"),
+    write("loader_completed (ish) => kernel_loaded (R3)\n"),
+    write("drivers_installed (ish)\n"),
+    write("kernel_loaded + drivers_installed => processes_started (R2)\n"),
+    write("kernel_loaded => memory_allocated (R5)\n"),
+    write("processes_started + memory_allocated => scheduler_running (R1)\n"),
+    write("drivers_installed => filesystem_mounted (R6)\n"),
+    write("scheduler_running + filesystem_mounted => system_operates (R4)\n").
