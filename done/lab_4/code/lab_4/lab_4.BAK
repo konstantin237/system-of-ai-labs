@@ -1,181 +1,298 @@
-/* Produktsionnaya sistema: Operatsionnye sistemy */
-/* Variant 2 */
-
 domains
-  fact = symbol
-  rule_name = symbol
+    fact = symbol
+    rule_name = symbol
 
 database
-  working_memory(fact)
-  used_rule(rule_name)
-  derived_fact(fact)
+    working_memory(fact)
+    used_rule(rule_name)
+    derived_fact(fact)
+
+/* ===== ËÎÃÈÊÀ ÏÐÅÄÈÊÀÒÎÂ (ÄËß ÊÂÀÍÒÎÐÎÂ) ===== */
+database
+    cook(symbol)
+    ready(symbol)
 
 predicates
-  start
-  init_working_memory
-  clear_database
-  forward_reasoning
-  backward_reasoning(fact)
-  nondeterm fire_rule(rule_name) - (i) (o)
-  nondeterm can_fire
-  check_condition(fact)
-  add_fact(fact)
-  display_working_memory
-  display_result(fact)
-  show_derivation_tree
+    start
+    clear_db
+    init_facts
+    forward_reasoning
+    backward_reasoning(fact)
+    nondeterm fire(rule_name)
+    check(fact)
+    add(fact)
+    show_memory
+    show_result(fact)
+    show_tree
+
+/* --- ÏÐÅÄÈÊÀÒÛ Ñ ÊÂÀÍÒÎÐÀÌÈ --- */
+predicates
+    prepares(symbol, symbol)
+    cooks(symbol, symbol)
+    can_serve(symbol)
 
 goal
-  start.
+    start.
 
 clauses
-  start:-
-    clear_database,
-    write("\n=== OPERATSIONNYE SISTEMY ===\n"),
-    init_working_memory,
-    write("\nIshodnaya pamyat:\n"),
-    display_working_memory,
-    
-    write("\n--- PRYAMOJ VYVOD ---\n"),
+
+/* ================= ÏÐÎÃÐÀÌÌÍÛÉ ÂÕÎÄ ================= */
+
+start :-
+    clear_db,
+    write("\n=== COOKING KNOWLEDGE SYSTEM ===\n"),
+    init_facts,
+    write("\nInitial facts:\n"),
+    show_memory,
+
+    write("\n--- FORWARD CHAINING ---\n"),
     forward_reasoning,
-    write("\nRezultat:\n"),
-    display_working_memory,
-    show_derivation_tree,
-    
-    clear_database,
-    init_working_memory,
-    
-    write("\n--- OBRATNYJ VYVOD ---\n"),
-    write("Tsel: system_operates\n"),
-    backward_reasoning(system_operates),
-    display_result(system_operates),
+    write("\nResulting facts:\n"),
+    show_memory,
+    show_tree,
+
+    clear_db,
+    init_facts,
+
+    write("\n--- BACKWARD CHAINING ---\n"),
+    write("Goal: serve_dish\n"),
+    backward_reasoning(serve_dish),
+    show_result(serve_dish),
     !.
 
-  clear_database:-
+/* ================= Î×ÈÑÒÊÀ ÁÀÇÛ ================= */
+
+clear_db :-
     retractall(working_memory(_)),
     retractall(used_rule(_)),
-    retractall(derived_fact(_)).
+    retractall(derived_fact(_)),
+    retractall(cook(_)),
+    retractall(ready(_)).
 
-  init_working_memory:-
-    asserta(working_memory(loader_completed)),
-    asserta(working_memory(drivers_installed)).
+/* ================= ÍÀ×ÀËÜÍÛÅ ÔÀÊÒÛ (?) ================= */
 
-% === Ïðàâèëà ñèñòåìû ===
-  fire_rule(r1):-
-    not(used_rule(r1)),
-    check_condition(processes_started),
-    check_condition(memory_allocated),
-    add_fact(scheduler_running),
-    asserta(used_rule(r1)),
-    asserta(derived_fact(scheduler_running)),
-    write("R1: processes_started I memory_allocated => scheduler_running\n").
+init_facts :-
+    asserta(working_memory(has_chicken)),
+    asserta(working_memory(has_vegetables)),
+    asserta(working_memory(has_rice)),
+    asserta(working_memory(oven_ready)),
+    asserta(working_memory(has_spices)),
 
-  fire_rule(r2):-
-    not(used_rule(r2)),
-    check_condition(kernel_loaded),
-    check_condition(drivers_installed),
-    add_fact(processes_started),
-    asserta(used_rule(r2)),
-    asserta(derived_fact(processes_started)),
-    write("R2: kernel_loaded I drivers_installed => processes_started\n").
+    /* ?x cook(x) */
+    asserta(cook(ivan)),
 
-  fire_rule(r3):-
-    not(used_rule(r3)),
-    check_condition(loader_completed),
-    add_fact(kernel_loaded),
-    asserta(used_rule(r3)),
-    asserta(derived_fact(kernel_loaded)),
-    write("R3: loader_completed => kernel_loaded\n").
+    /* ?x ready(x) */
+    asserta(ready(dish1)).
 
-  fire_rule(r4):-
-    not(used_rule(r4)),
-    check_condition(scheduler_running),
-    check_condition(filesystem_mounted),
-    add_fact(system_operates),
-    asserta(used_rule(r4)),
-    asserta(derived_fact(system_operates)),
-    write("R4: scheduler_running I filesystem_mounted => system_operates\n").
+/* ================= ÏÐÀÂÈËÀ P1–P5 ================= */
 
-  fire_rule(r5):-
-    not(used_rule(r5)),
-    check_condition(kernel_loaded),
-    add_fact(memory_allocated),
-    asserta(used_rule(r5)),
-    asserta(derived_fact(memory_allocated)),
-    write("R5: kernel_loaded => memory_allocated\n").
+fire(p1) :-
+    not(used_rule(p1)),
+    check(has_chicken),
+    check(has_vegetables),
+    check(has_spices),
+    add(can_cook_chicken_with_veg),
+    asserta(used_rule(p1)),
+    asserta(derived_fact(can_cook_chicken_with_veg)),
+    write("P1: Chicken + Vegetables + Spices => Chicken with vegetables possible\n").
 
-  fire_rule(r6):-
-    not(used_rule(r6)),
-    check_condition(drivers_installed),
-    add_fact(filesystem_mounted),
-    asserta(used_rule(r6)),
-    asserta(derived_fact(filesystem_mounted)),
-    write("R6: drivers_installed => filesystem_mounted\n").
+fire(p2) :-
+    not(used_rule(p2)),
+    check(has_rice),
+    check(has_vegetables),
+    add(can_cook_rice_with_veg),
+    asserta(used_rule(p2)),
+    asserta(derived_fact(can_cook_rice_with_veg)),
+    write("P2: Rice + Vegetables => Rice with vegetables possible\n").
 
-  can_fire:- fire_rule(_).
+fire(p3) :-
+    not(used_rule(p3)),
+    check(has_chicken),
+    check(oven_ready),
+    add(can_bake_chicken),
+    asserta(used_rule(p3)),
+    asserta(derived_fact(can_bake_chicken)),
+    write("P3: Chicken + Oven ready => Baking possible\n").
 
-  check_condition(F):- working_memory(F),!.
-  
-  add_fact(F):- not(working_memory(F)), asserta(working_memory(F)),!.
-  add_fact(_):-!.
+fire(p4) :-
+    not(used_rule(p4)),
+    check(veg_cut),
+    check(chicken_prepared),
+    add(components_ready),
+    asserta(used_rule(p4)),
+    asserta(derived_fact(components_ready)),
+    write("P4: Vegetables cut + Chicken prepared => Components ready\n").
 
-  forward_reasoning:- can_fire, !, forward_reasoning.
-  forward_reasoning.
+fire(p5a) :-
+    not(used_rule(p5a)),
+    check(chicken_fried),
+    add(ready_to_combine),
+    asserta(used_rule(p5a)),
+    asserta(derived_fact(ready_to_combine)),
+    write("P5: Fried chicken => Ready to combine\n").
 
-  backward_reasoning(F):- 
-    working_memory(F), 
-    write("Fakt '"), write(F), write("' najden\n"),!.
+fire(p5b) :-
+    not(used_rule(p5b)),
+    check(rice_boiled),
+    add(ready_to_combine),
+    asserta(used_rule(p5b)),
+    asserta(derived_fact(ready_to_combine)),
+    write("P5: Boiled rice => Ready to combine\n").
 
-  backward_reasoning(system_operates):-
-    write("=> system_operates nuzhny: scheduler_running, filesystem_mounted\n"),
-    backward_reasoning(scheduler_running),
-    backward_reasoning(filesystem_mounted),
-    fire_rule(r4),!.
+/* ================= ÄÅÉÑÒÂÈß D1–D7 ================= */
 
-  backward_reasoning(scheduler_running):-
-    write("=> scheduler_running nuzhny: processes_started, memory_allocated\n"),
-    backward_reasoning(processes_started),
-    backward_reasoning(memory_allocated),
-    fire_rule(r1),!.
+fire(d1) :-
+    not(used_rule(d1)),
+    check(has_vegetables),
+    add(veg_cut),
+    asserta(used_rule(d1)),
+    write("D1: Vegetables are cut\n").
 
-  backward_reasoning(processes_started):-
-    write("=> processes_started nuzhny: kernel_loaded, drivers_installed\n"),
-    backward_reasoning(kernel_loaded),
-    backward_reasoning(drivers_installed),
-    fire_rule(r2),!.
+fire(d2) :-
+    not(used_rule(d2)),
+    check(has_chicken),
+    add(chicken_prepared),
+    asserta(used_rule(d2)),
+    write("D2: Chicken is prepared\n").
 
-  backward_reasoning(kernel_loaded):-
-    write("=> kernel_loaded nuzhen: loader_completed\n"),
-    backward_reasoning(loader_completed),
-    fire_rule(r3),!.
+fire(d3) :-
+    not(used_rule(d3)),
+    check(components_ready),
+    add(chicken_fried),
+    asserta(used_rule(d3)),
+    write("D3: Chicken with vegetables is fried\n").
 
-  backward_reasoning(memory_allocated):-
-    write("=> memory_allocated nuzhen: kernel_loaded\n"),
-    backward_reasoning(kernel_loaded),
-    fire_rule(r5),!.
+fire(d4) :-
+    not(used_rule(d4)),
+    check(can_cook_rice_with_veg),
+    add(rice_boiled),
+    asserta(used_rule(d4)),
+    write("D4: Rice with vegetables is boiled\n").
 
-  backward_reasoning(filesystem_mounted):-
-    write("=> filesystem_mounted nuzhny: drivers_installed\n"),
-    backward_reasoning(drivers_installed),
-    fire_rule(r6),!.
+fire(d5) :-
+    not(used_rule(d5)),
+    check(can_bake_chicken),
+    add(chicken_baked),
+    asserta(used_rule(d5)),
+    write("D5: Chicken is baked in the oven\n").
 
-  display_working_memory:-
-    working_memory(F), 
-    write("  "), write(F), write("\n"), 
+fire(d6) :-
+    not(used_rule(d6)),
+    check(ready_to_combine),
+    add(dish_completed),
+    asserta(used_rule(d6)),
+    asserta(ready(dish)),
+    write("D6: Components are combined\n").
+
+fire(d7) :-
+    not(used_rule(d7)),
+    check(dish_completed),
+    add(serve_dish),
+    asserta(used_rule(d7)),
+    write("D7: The dish is served\n").
+
+check(F) :- working_memory(F), !.
+
+add(F) :-
+    not(working_memory(F)),
+    asserta(working_memory(F)), !.
+add(_) :- !.
+
+forward_reasoning :-
+    fire(_),
+    !,
+    forward_reasoning.
+forward_reasoning.
+
+/* ================= ÎÁÐÀÒÍÛÉ ÂÛÂÎÄ ================= */
+
+backward_reasoning(F) :-
+    working_memory(F),
+    write("Fact found: "),
+    write(F), nl, !.
+
+backward_reasoning(serve_dish) :-
+    write("To serve dish => need dish_completed\n"),
+    backward_reasoning(dish_completed),
+    fire(d7), !.
+
+backward_reasoning(dish_completed) :-
+    write("To complete dish => need ready_to_combine\n"),
+    backward_reasoning(ready_to_combine),
+    fire(d6), !.
+
+backward_reasoning(ready_to_combine) :-
+    write("To combine => need chicken_fried\n"),
+    backward_reasoning(chicken_fried),
+    fire(p5a), !.
+
+backward_reasoning(ready_to_combine) :-
+    write("To combine => need rice_boiled\n"),
+    backward_reasoning(rice_boiled),
+    fire(p5b), !.
+
+backward_reasoning(chicken_fried) :-
+    write("To fry chicken => need components_ready\n"),
+    backward_reasoning(components_ready),
+    fire(d3), !.
+
+backward_reasoning(rice_boiled) :-
+    write("To boil rice => need can_cook_rice_with_veg\n"),
+    backward_reasoning(can_cook_rice_with_veg),
+    fire(d4), !.
+
+backward_reasoning(components_ready) :-
+    write("To prepare components => need veg_cut and chicken_prepared\n"),
+    backward_reasoning(veg_cut),
+    backward_reasoning(chicken_prepared),
+    fire(p4), !.
+
+backward_reasoning(veg_cut) :-
+    fire(d1), !.
+
+backward_reasoning(chicken_prepared) :-
+    fire(d2), !.
+
+backward_reasoning(can_cook_rice_with_veg) :-
+    fire(p2), !.
+
+/* ================= ËÎÃÈÊÀ ÏÐÅÄÈÊÀÒÎÂ (?, ?) ================= */
+
+/* ?x cook(x) -> prepares(x, food) */
+prepares(X, food) :- cook(X).
+
+/* ?x cooks(x, soup) */
+cooks(ivan, soup).
+
+/* ?x ready(x) -> can_serve(x) */
+can_serve(X) :- ready(X).
+
+/* ================= ÂÛÂÎÄ ÍÀ ÝÊÐÀÍ ================= */
+
+show_memory :-
+    working_memory(F),
+    write("  "),
+    write(F), nl,
     fail.
-  display_working_memory.
+show_memory.
 
-  display_result(F):-
-    working_memory(F), 
-    write("\nUspeh! Fakt '"), write(F), write("' dokazan.\n"),!.
-  display_result(F):-
-    write("\nFakt '"), write(F), write("' ne mozhet byt dokazan.\n").
+show_result(F) :-
+    working_memory(F),
+    write("\nSUCCESS: Goal "),
+    write(F),
+    write(" achieved.\n"), !.
+show_result(F) :-
+    write("\nFAILURE: Goal "),
+    write(F),
+    write(" NOT achieved.\n").
 
-  show_derivation_tree:-
-    write("\n--- Derevo vyvoda ---\n"),
-    write("loader_completed (ish) => kernel_loaded (R3)\n"),
-    write("drivers_installed (ish)\n"),
-    write("kernel_loaded + drivers_installed => processes_started (R2)\n"),
-    write("kernel_loaded => memory_allocated (R5)\n"),
-    write("processes_started + memory_allocated => scheduler_running (R1)\n"),
-    write("drivers_installed => filesystem_mounted (R6)\n"),
-    write("scheduler_running + filesystem_mounted => system_operates (R4)\n").
+show_tree :-
+    write("\n--- DERIVATION TREE ---\n"),
+    write("has_vegetables => veg_cut (D1)\n"),
+    write("has_chicken => chicken_prepared (D2)\n"),
+    write("veg_cut + chicken_prepared => components_ready (P4)\n"),
+    write("components_ready => chicken_fried (D3)\n"),
+    write("has_rice + has_vegetables => rice_boiled (P2 + D4)\n"),
+    write("chicken_fried OR rice_boiled => ready_to_combine (P5)\n"),
+    write("ready_to_combine => dish_completed (D6)\n"),
+    write("dish_completed => serve_dish (D7)\n").
